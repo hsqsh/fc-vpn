@@ -49,10 +49,10 @@ def handle_client(client_sock):
                     return
                 if s is client_sock:
                     remote.sendall(data)
-                    print(f"[FORWARD] {addr}:{port} <- 客户端发来 {len(data)} 字节")
+                    print(f"[FORWARD] {addr}:{port} <- user sending {len(data)} bytes")
                 else:
                     client_sock.sendall(data)
-                    print(f"[FORWARD] {addr}:{port} -> 返回客户端 {len(data)} 字节")
+                    print(f"[FORWARD] {addr}:{port} -> sending back to user {len(data)} bytes")
     except Exception as e:
         print("Error:", e)
         client_sock.close()
