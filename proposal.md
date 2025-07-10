@@ -1,5 +1,5 @@
 ---
-marp: false
+marp: true
 theme: gaia
 paginate: true
 ---
@@ -11,7 +11,7 @@ paginate: true
 **Liu Yafei**  
 **Qin Sihan**  
 **Zhang Runze**  
-**Zhang zeshen**
+**Zhang Zeshen**
 
 <br>
 <small>July 2025</small>
@@ -53,7 +53,7 @@ k8s auto-scales pods as amount of users changes
 - Target users (two directions): 
 -1. small businesses/teams (NAT traverselNetwork Address Translation traversal)
 -2. Bypassing the firewall
-- Complete VPN component is available (instead the prototype)
+- Complete VPN component is available (instead of a  prototype)
 
 ---
 
@@ -73,5 +73,5 @@ k8s auto-scales pods as amount of users changes
 # Discussion Questions
 
 - The key technical challenges?
-- Divide the work?
+- Dividing ofthe work?
 - Regarding "direction": good to see two or just focus on one?
