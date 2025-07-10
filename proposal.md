@@ -60,8 +60,10 @@ k8s auto-scales pods as amount of users changes
 # Demo
 **Client (Frontend):**
 - Multiple clients, each with a personal user profile (StatefulSet)
-- Display outgoing public IP (optional, or as an element to show different IP by proxy)
-- data display
+- Display outgoing public IP (optional, or as an element to show different IP by proxy, ideas:
+-display ip location
+-access to regional specific html)
+- Data display (currently html)
 ---
 # Demo
 **Proxy Monitor:**
