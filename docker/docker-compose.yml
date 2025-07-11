@@ -1,0 +1,16 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ../backend
+      dockerfile: ../docker/backend.Dockerfile
+    ports:
+      - "8000:8000"
+    # TODO: 按需补充环境变量、卷等
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    ports:
+      - "8080:80"
+    # TODO: 按需补充环境变量、卷等 
