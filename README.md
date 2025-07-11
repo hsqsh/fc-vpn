@@ -8,6 +8,51 @@
 - docker/    # Docker 部署相关
 - docs/      # 文档资料
 
+```
+fc-vpn/
+│
+├── backend/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── proxy.py         # 代理/转发核心逻辑
+│   │   ├── k8s_mock.py      # K8s 场景模拟接口
+│   │   └── config.py        # 配置
+│   ├── main.py              # FastAPI 启动入口
+│   ├── requirements.txt
+│   └── README.md
+│
+├── frontend/
+│   ├── src/
+│   │   ├── App.vue
+│   │   ├── main.js
+│   │   ├── router.js
+│   │   ├── store.js
+│   │   ├── pages/
+│   │   │   ├── Dashboard.vue
+│   │   │   ├── Login.vue
+│   │   │   ├── Monitor.vue
+│   │   │   └── Profile.vue
+│   │   └── components/
+│   │       ├── NetworkStatus.vue
+│   │       └── TrafficMonitor.vue
+│   ├── public/
+│   │   └── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   └── README.md
+│
+├── docker/
+│   ├── backend.Dockerfile
+│   ├── frontend.Dockerfile
+│   └── docker-compose.yml
+│
+├── README.md
+└── docs/
+    ├── proposal.md
+    └── proposal.pdf
+```
+
+
 ## 快速开始
 
 ### 本地开发
