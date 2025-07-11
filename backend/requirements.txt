@@ -1,0 +1,3 @@
+fastapi
+uvicorn
+# 如需其他依赖请补充
