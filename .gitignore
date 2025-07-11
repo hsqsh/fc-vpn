@@ -1,0 +1,25 @@
+# Node.js dependencies
+fc-vpn-portal/frontend/node_modules/
+
+# Python cache and DB
+fc-vpn-portal/backend/__pycache__/
+fc-vpn-portal/backend/vpn_service.db
+
+# Build output
+fc-vpn-portal/frontend/dist/
+fc-vpn-portal/frontend/.cache/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Misc
+.env
+*.local
