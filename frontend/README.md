@@ -1,6 +1,6 @@
-# FC-VPN Frontend
+# BabelNet Frontend
 
-Vue.js-based frontend application for FC-VPN, featuring a modern dark-themed dashboard with real-time monitoring and user authentication.
+Vue.js-based frontend application for BabelNet, featuring a modern dark-themed dashboard with real-time monitoring and user authentication.
 
 ## Features
 
@@ -202,10 +202,10 @@ This creates a `dist/` directory with optimized production files.
 
 ```bash
 # Build Docker image
-docker build -t fc-vpn-frontend .
+docker build -t babelnet-frontend .
 
 # Run container
-docker run -p 80:80 fc-vpn-frontend
+docker run -p 80:80 babelnet-frontend
 ```
 
 ### Static Hosting

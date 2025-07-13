@@ -63,3 +63,5 @@ coverage.xml
 
 # Optional: ignore proposal临时文件
 proposal.*
+
+podman-setup.md

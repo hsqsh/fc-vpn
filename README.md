@@ -1,4 +1,4 @@
-# FC-VPN
+# BabelNet
 
 A cloud-native elastic VPN solution with SOCKS5 proxy functionality, featuring a modern web dashboard and Kubernetes integration simulation.
 
@@ -13,7 +13,7 @@ A cloud-native elastic VPN solution with SOCKS5 proxy functionality, featuring a
 ## Project Structure
 
 ```
-fc-vpn/
+babelnet/
 ├── backend/                 # FastAPI backend service
 │   ├── app/
 │   │   ├── __init__.py
@@ -67,7 +67,7 @@ fc-vpn/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd fc-vpn
+   cd babelnet
    ```
 
 2. **Start Backend**
@@ -91,102 +91,127 @@ fc-vpn/
    - Login: http://localhost:8080/#/login
    - Register: http://localhost:8080/#/register
 
-### Docker Deployment
+### Docker/Podman Deployment
 
+#### 使用通用部署脚本（推荐）
+```bash
+# 启动所有服务
+./scripts/deploy.sh up
+
+# 构建镜像
+./scripts/deploy.sh build
+
+# 停止服务
+./scripts/deploy.sh down
+
+# 查看日志
+./scripts/deploy.sh logs
+
+# 查看帮助
+./scripts/deploy.sh help
+```
+
+#### 手动部署
+
+**Docker 用户:**
 ```bash
 cd docker
 docker-compose up --build
 ```
 
+**Podman 用户:**
+```bash
+# 安装 podman-compose
+pip install podman-compose
+
+# 启动服务
+cd docker
+podman-compose -f podman-compose.yml up --build
+```
+
+## Docker 镜像部署（推荐给组员）
+
+如果你不想本地构建镜像，可以直接拉取我推送到 Docker Hub 的镜像。
+
+### 步骤
+
+1. **拉取镜像**
+
+```bash
+# 拉取后端镜像
+docker pull oliviaaa77/docker_backend:latest
+
+# 拉取前端镜像
+docker pull oliviaaa77/docker_frontend:latest
+```
+
+2. **编辑 docker-compose.yml**
+
+在 `docker/docker-compose.yml` 中，将 `build:` 字段注释掉或删除，改为 `image:` 字段。例如：
+
+```yaml
+services:
+  backend:
+    # build:
+    #   context: ..
+    #   dockerfile: docker/backend.Dockerfile
+    image: oliviaaa77/docker_backend:latest
+    container_name: babelnet-backend
+    ports:
+      - "8000:8000"
+      - "8888:8888"
+    environment:
+      - LISTEN_HOST=0.0.0.0
+      - LISTEN_PORT=8888
+    networks:
+      - babelnet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    # build:
+    #   context: ..
+    #   dockerfile: docker/frontend.Dockerfile
+    image: oliviaaa77/docker_frontend:latest
+    container_name: babelnet-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - babelnet-network
+    restart: unless-stopped
+
+networks:
+  babelnet-network:
+    driver: bridge
+```
+
+3. **启动服务**
+
+```bash
+cd docker
+docker-compose up -d
+```
+
+4. **访问服务**
+- 前端：http://localhost:8080
+- 后端API：http://localhost:8000
+
+---
+
+**注意：**
+- 组员只需要安装 Docker 和 docker-compose，不需要 Podman。
+- 如果端口被占用，可以自行修改 `docker-compose.yml` 里的端口映射。
+- 如需更新镜像，先 `docker pull` 再 `docker-compose up -d`。
+
 ## API Documentation
 
 ### Authentication Endpoints
 
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-
-### Proxy Endpoints
-
-- `GET /proxy/status` - Get proxy status and statistics
-- `GET /proxy/ip` - Get proxy server IP address
-
-### Kubernetes Mock Endpoints
-
-- `GET /k8s/pods` - Get mock pod information
-- `GET /k8s/nodes` - Get mock node information
-
-### Interactive API Docs
-
-Visit http://localhost:8000/docs for interactive API documentation (Swagger UI).
-
-## Features in Detail
-
-### SOCKS5 Proxy
-- Supports CONNECT command for TCP forwarding
-- Handles IPv4 and domain name targets
-- Multi-threaded client handling
-- Real-time traffic monitoring
-
-### Web Dashboard
-- Modern dark theme with gradient background
-- Real-time proxy status display
-- User authentication status
-- Kubernetes pod/node monitoring
-- Responsive design
-
-### User Management
-- User registration and login
-- Session persistence with localStorage
-- Secure password handling (ready for database integration)
-
-## Development
-
-### Backend Development
-- FastAPI framework with automatic API documentation
-- Modular architecture with separate routers
-- Ready for database integration (currently using in-memory storage)
-- Comprehensive error handling
-
-### Frontend Development
-- Vue.js 2.x with Vue Router and Vuex
-- Modern ES6+ JavaScript
-- Responsive design with CSS Grid/Flexbox
-- Proxy configuration for development
-
-## Deployment
-
-### Cloud Deployment (AWS EKS)
-The application is designed for Kubernetes deployment with:
-- Horizontal pod autoscaling
-- Load balancing
-- Health checks and monitoring
-- Configurable resource limits
-
-### Local Production
-```bash
-# Backend
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
-
-# Frontend
-cd frontend
-npm run build
-# Serve the dist/ directory with a web server
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-[Add your license here]
-
-## Support
-
-For questions and support, please open an issue in the repository.
+- `

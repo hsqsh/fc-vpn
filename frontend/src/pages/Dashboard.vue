@@ -1,11 +1,20 @@
 <template>
   <div class="dashboard">
     <div class="header">
-      <h1>FC-VPN Dashboard</h1>
+      <h1>BabelNet Dashboard</h1>
       <div class="user-info">
-        <span v-if="userInfo.isLoggedIn" class="username">
-          Welcome, {{ userInfo.username }}
-        </span>
+        <div v-if="userInfo.isLoggedIn" class="user-dropdown" @click="toggleDropdown">
+          <span class="username">
+            Welcome, {{ userInfo.username }}
+          </span>
+          <span class="dropdown-arrow">▼</span>
+          <div v-if="showDropdown" class="dropdown-menu">
+            <div class="dropdown-item" @click="logout">
+              <span class="logout-icon">🚪</span>
+              退出登录
+            </div>
+          </div>
+        </div>
         <a v-else @click.prevent="goLogin" href="/login" class="login-link">
           Not logged in
         </a>
@@ -73,6 +82,7 @@ export default {
         username: '',
         isLoggedIn: false
       },
+      showDropdown: false,
       networkStatus: 'online', // 可根据实际API动态获取
       proxyIp: '',
       proxyStatus: {
@@ -91,16 +101,98 @@ export default {
     this.fetchPods();
     this.fetchNodes();
     this.fetchProxyIp();
+    // 添加点击外部关闭下拉菜单的事件监听
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeDestroy() {
+    // 移除事件监听
+    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     loadUserInfo() {
       const user = localStorage.getItem('user');
       if (user) {
-        this.userInfo = JSON.parse(user);
+        try {
+          this.userInfo = JSON.parse(user);
+        } catch (e) {
+          this.userInfo = {
+            username: '',
+            isLoggedIn: false
+          };
+        }
       }
     },
     goLogin() {
       this.$router.push('/login');
+    },
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    logout() {
+      // 清除本地存储的用户信息
+      localStorage.removeItem('user');
+      // 重置用户状态
+      this.userInfo = {
+        username: '',
+        isLoggedIn: false
+      };
+      // 关闭下拉菜单
+      this.showDropdown = false;
+      // 显示退出成功消息
+      this.showLogoutMessage();
+    },
+    handleClickOutside(event) {
+      // 检查点击是否在下拉菜单外部
+      const dropdown = this.$el.querySelector('.user-dropdown');
+      if (dropdown && !dropdown.contains(event.target)) {
+        this.showDropdown = false;
+      }
+    },
+    showLogoutMessage() {
+      // 创建一个临时的成功消息
+      const message = document.createElement('div');
+      message.textContent = '已成功退出登录';
+      message.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #22c55e;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 10000;
+        font-size: 14px;
+        animation: slideIn 0.3s ease-out;
+      `;
+      
+      // 添加动画样式
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes slideIn {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      document.body.appendChild(message);
+      
+      // 3秒后自动移除
+      setTimeout(() => {
+        if (message.parentNode) {
+          message.parentNode.removeChild(message);
+        }
+        if (style.parentNode) {
+          style.parentNode.removeChild(style);
+        }
+      }, 3000);
     },
     async fetchProxyStatus() {
       try {
@@ -182,6 +274,57 @@ export default {
 .username {
   color: #6b7280;
   font-weight: 500;
+}
+.user-dropdown {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.user-dropdown:hover {
+  background-color: rgba(107, 114, 128, 0.1);
+}
+.dropdown-arrow {
+  font-size: 12px;
+  color: #6b7280;
+  transition: transform 0.2s;
+}
+.user-dropdown:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: rgba(24, 26, 27, 0.95);
+  border: 1px solid rgba(35, 37, 38, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  min-width: 140px;
+  z-index: 1000;
+  margin-top: 4px;
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  color: #e5e6e7;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  margin: 4px;
+}
+.dropdown-item:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+.logout-icon {
+  font-size: 16px;
 }
 .login-link {
   color: #b0b3b8;
