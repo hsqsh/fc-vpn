@@ -1,0 +1,65 @@
+# Python
+backend/__pycache__/
+backend/app/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+ENV/
+env/
+pip-log.txt
+
+# Jupyter Notebook
+*.ipynb_checkpoints
+
+# VSCode
+.vscode/
+
+# PyCharm/IntelliJ IDEA
+.idea/
+
+# macOS
+.DS_Store
+
+# Vim/Emacs
+*.swp
+*.swo
+*~
+
+# Node/Vue
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.DS_Store
+
+# Log files
+*.log
+
+# Docker
+**/.env
+
+# PDF/临时文档
+docs/*.pdf
+
+# System files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Optional: ignore coverage/test output
+htmlcov/
+.coverage
+.tox/
+.pytest_cache/
+coverage.xml
+
+# Optional: ignore proposal临时文件
+proposal.*

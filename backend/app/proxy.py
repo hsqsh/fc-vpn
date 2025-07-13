@@ -2,15 +2,30 @@
 import socket
 import threading
 import select
-from app.config import LISTEN_HOST, LISTEN_PORT
 from fastapi import APIRouter
+from .config import LISTEN_HOST, LISTEN_PORT
 
 router = APIRouter()
 
-@router.get("/proxy/status")
-def proxy_status():
-    # 可以返回当前代理的状态、连接数等
-    return {"status": "running"}
+# 用于模拟用户存储
+fake_users = {}
+
+LISTEN_HOST = '0.0.0.0'
+LISTEN_PORT = 8888
+
+@router.get("/proxy/ip")
+def get_proxy_ip():
+    """返回代理器的IP地址"""
+    try:
+        # 获取本机IP地址
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return {"ip": local_ip}
+    except Exception as e:
+        # 如果获取失败，返回默认值
+        return {"ip": "127.0.0.1"}
 
 def handle_client(client_sock):
     try:
