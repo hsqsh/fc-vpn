@@ -27,6 +27,18 @@ def get_proxy_ip():
         # 如果获取失败，返回默认值
         return {"ip": "127.0.0.1"}
 
+@router.get("/proxy/status")
+def get_proxy_status():
+    """返回代理状态信息"""
+    # 这里可以返回实际的代理状态，目前返回模拟数据
+    return {
+        "active_connections": 0,
+        "total_connections": 0,
+        "total_traffic_up": 0,
+        "total_traffic_down": 0,
+        "status": "running"
+    }
+
 def handle_client(client_sock):
     try:
         # 1. 握手阶段
