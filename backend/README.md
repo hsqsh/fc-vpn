@@ -1,6 +1,6 @@
-# FC-VPN Backend
+# BabelNet Backend
 
-FastAPI-based backend service for FC-VPN, providing SOCKS5 proxy functionality, user authentication, and Kubernetes integration simulation.
+FastAPI-based backend service for BabelNet, providing SOCKS5 proxy functionality, user authentication, and Kubernetes integration simulation.
 
 ## Features
 
@@ -222,8 +222,8 @@ uvicorn main:app --host 0.0.0.0 --port 8000
 ### Docker
 
 ```bash
-docker build -t fc-vpn-backend .
-docker run -p 8000:8000 -p 8888:8888 fc-vpn-backend
+docker build -t babelnet-backend .
+docker run -p 8000:8000 -p 8888:8888 babelnet-backend
 ```
 
 ### Kubernetes

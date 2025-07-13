@@ -39,6 +39,11 @@ def get_proxy_status():
         "status": "running"
     }
 
+@router.get("/healthz")
+def health_check():
+    """健康检查接口"""
+    return {"status": "healthy", "timestamp": "2024-01-01T00:00:00Z"}
+
 def handle_client(client_sock):
     try:
         # 1. 握手阶段

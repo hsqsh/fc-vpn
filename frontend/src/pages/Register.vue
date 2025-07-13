@@ -49,10 +49,53 @@ export default {
           this.error = data.detail || 'Registration failed';
         } else {
           const data = await res.json();
-          this.success = data.msg;
+          this.success = '注册成功！正在自动登录...';
+          
+          // 注册成功后自动登录
+          await this.autoLogin();
         }
       } catch (e) {
         this.error = 'Network error';
+      }
+    },
+    async autoLogin() {
+      try {
+        const res = await fetch('/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password
+          })
+        });
+        
+        if (res.ok) {
+          // 保存登录状态到 localStorage
+          localStorage.setItem('user', JSON.stringify({
+            username: this.username,
+            isLoggedIn: true
+          }));
+          
+          // 显示登录成功消息
+          this.success = '注册并登录成功！正在跳转到仪表板...';
+          
+          // 延迟跳转到 Dashboard
+          setTimeout(() => {
+            this.$router.push('/');
+          }, 1500);
+        } else {
+          // 如果自动登录失败，提示用户手动登录
+          this.success = '注册成功！请手动登录。';
+          setTimeout(() => {
+            this.$router.push('/login');
+          }, 2000);
+        }
+      } catch (e) {
+        // 如果自动登录失败，提示用户手动登录
+        this.success = '注册成功！请手动登录。';
+        setTimeout(() => {
+          this.$router.push('/login');
+        }, 2000);
       }
     },
     goLogin() {

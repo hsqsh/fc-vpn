@@ -1,3 +1,4 @@
 fastapi
 uvicorn
+requests
 # 如需其他依赖请补充

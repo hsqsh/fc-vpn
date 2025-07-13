@@ -49,7 +49,7 @@ export default {
           this.error = data.detail || 'Login failed';
         } else {
           const data = await res.json();
-          this.success = data.msg;
+          this.success = '登录成功！正在跳转到仪表板...';
           // 保存登录状态到 localStorage
           localStorage.setItem('user', JSON.stringify({
             username: this.username,
@@ -58,7 +58,7 @@ export default {
           // 跳转到 Dashboard
           setTimeout(() => {
             this.$router.push('/');
-          }, 1000);
+          }, 1500);
         }
       } catch (e) {
         this.error = 'Network error';
