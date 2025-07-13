@@ -1,28 +1,28 @@
 <template>
   <div class="auth-page">
-    <h2>User Login</h2>
-    <form @submit.prevent="onLogin">
+    <h2>User Registration</h2>
+    <form @submit.prevent="onRegister">
       <div class="form-row">
-        <label for="login-username">Username</label>
-        <input id="login-username" v-model="username" required autocomplete="username" />
+        <label for="register-username">Username</label>
+        <input id="register-username" v-model="username" required autocomplete="username" />
       </div>
       <div class="form-row">
-        <label for="login-password">Password</label>
-        <input id="login-password" v-model="password" type="password" required autocomplete="current-password" />
+        <label for="register-password">Password</label>
+        <input id="register-password" v-model="password" type="password" required autocomplete="new-password" />
       </div>
-      <button type="submit">Login</button>
+      <button type="submit">Register</button>
     </form>
     <div v-if="error" class="error">{{ error }}</div>
     <div v-if="success" class="success">{{ success }}</div>
     <div class="switch-link">
-      Don't have an account? <a @click.prevent="goRegister" href="/register">Register</a>
+      Already have an account? <a @click.prevent="goLogin" href="/login">Login</a>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Login',
+  name: 'Register',
   data() {
     return {
       username: '',
@@ -32,11 +32,11 @@ export default {
     };
   },
   methods: {
-    async onLogin() {
+    async onRegister() {
       this.error = '';
       this.success = '';
       try {
-        const res = await fetch('/auth/login', {
+        const res = await fetch('/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -46,26 +46,17 @@ export default {
         });
         if (!res.ok) {
           const data = await res.json();
-          this.error = data.detail || 'Login failed';
+          this.error = data.detail || 'Registration failed';
         } else {
           const data = await res.json();
           this.success = data.msg;
-          // 保存登录状态到 localStorage
-          localStorage.setItem('user', JSON.stringify({
-            username: this.username,
-            isLoggedIn: true
-          }));
-          // 跳转到 Dashboard
-          setTimeout(() => {
-            this.$router.push('/');
-          }, 1000);
         }
       } catch (e) {
         this.error = 'Network error';
       }
     },
-    goRegister() {
-      this.$router.push('/register');
+    goLogin() {
+      this.$router.push('/login');
     }
   }
 };
@@ -157,4 +148,4 @@ button:hover {
   cursor: pointer;
   margin-left: 4px;
 }
-</style> 
+</style>

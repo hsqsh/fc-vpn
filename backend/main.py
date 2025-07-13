@@ -10,3 +10,7 @@ app.include_router(proxy_router)
 app.include_router(k8s_router)
 
 # 启动命令：uvicorn backend.main:app --reload 
+
+# 注册 auth 路由
+from app.auth import router as auth_router
+app.include_router(auth_router)
