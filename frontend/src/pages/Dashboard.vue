@@ -17,9 +17,23 @@
         <NetworkStatus :status="networkStatus" />
       </div>
       <div class="card">
-        <h2>代理信息</h2>
-        <div>代理IP: <b>{{ proxyIp }}</b></div>
-        <div>活跃连接: <b>{{ proxyStatus.active_connections }}</b></div>
+        <h2>代理状态</h2>
+        <div class="status-item">
+          <span class="label">状态:</span>
+          <span class="value" :class="proxyStatus.status">{{ proxyStatus.status }}</span>
+        </div>
+        <div class="status-item">
+          <span class="label">代理IP:</span>
+          <span class="value">{{ proxyIp }}</span>
+        </div>
+        <div class="status-item">
+          <span class="label">活跃连接:</span>
+          <span class="value">{{ proxyStatus.active_connections }}</span>
+        </div>
+      </div>
+      <div class="card">
+        <h2>流量监控</h2>
+        <TrafficMonitor :status="proxyStatus" />
       </div>
       <div class="card">
         <h2>K8s Pods</h2>
@@ -39,10 +53,6 @@
           </li>
         </ul>
       </div>
-    </div>
-    <div class="traffic-section">
-      <h2>流量转发状态</h2>
-      <TrafficMonitor :status="proxyStatus" />
     </div>
   </div>
 </template>
@@ -132,6 +142,14 @@ export default {
       } catch (e) {
         this.proxyIp = window.location.hostname;
       }
+    },
+    formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     }
   }
 };
@@ -213,6 +231,22 @@ export default {
 }
 .card .failed {
   color: #ef4444;
+}
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.status-item .label {
+  color: #b0b3b8;
+  font-size: 0.9em;
+  font-weight: 400;
+}
+.status-item .value {
+  color: #e5e6e7;
+  font-weight: 500;
+  font-size: 1em;
 }
 .traffic-section {
   background: rgba(24, 26, 27, 0.85);
