@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP地址检测测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .test-item {
+            background: rgba(255,255,255,0.2);
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .ip-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .loading {
+            color: #FFA500;
+        }
+        .error {
+            color: #FF6B6B;
+            border-left-color: #FF6B6B;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .proxy-info {
+            background: rgba(255,255,255,0.15);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 IP地址检测与代理测试</h1>
+        
+        <div class="proxy-info">
+            <h3>📋 当前代理架构说明：</h3>
+            <p><strong>本地SOCKS5代理:</strong> 127.0.0.1:8888</p>
+            <p><strong>作用:</strong> 数据转发，不改变出口IP</p>
+            <p><strong>要改变IP需要:</strong> 连接到远程VPN/代理服务器</p>
+        </div>
+
+        <div class="test-item">
+            <h3>🔍 方法1: 直接访问IP检测服务</h3>
+            <button onclick="checkIP('direct')">检测当前IP</button>
+            <div id="direct-result" class="ip-display">点击检测...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>🔄 方法2: 通过本地代理测试</h3>
+            <p>注意：由于浏览器限制，无法直接在网页中使用SOCKS5代理</p>
+            <button onclick="checkProxy()">测试代理连通性</button>
+            <div id="proxy-result" class="ip-display">点击测试...</div>
+        </div>
+
+        <div class="test-item">
+            <h3>📊 多个IP检测服务对比</h3>
+            <button onclick="checkMultipleServices()">检测多个服务</button>
+            <div id="multiple-results"></div>
+        </div>
+
+        <div class="test-item">
+            <h3>🛠️ 如何使用代理改变IP</h3>
+            <p><strong>当前架构:</strong> 你的电脑 → 本地代理 → 网站 (IP不变)</p>
+            <p><strong>需要的架构:</strong> 你的电脑 → 本地代理 → 远程VPN服务器 → 网站 (IP变为VPN服务器IP)</p>
+            <p><strong>解决方案:</strong></p>
+            <ul>
+                <li>配置代理连接到远程VPN服务器</li>
+                <li>使用云服务器搭建代理服务器</li>
+                <li>集成第三方VPN服务API</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function checkIP(method) {
+            const resultDiv = document.getElementById(`${method}-result`);
+            resultDiv.innerHTML = '<span class="loading">🔄 检测中...</span>';
+            
+            try {
+                // 使用多个IP检测服务
+                const services = [
+                    'https://api.ipify.org?format=json',
+                    'https://httpbin.org/ip',
+                    'https://api.my-ip.io/ip.json'
+                ];
+                
+                const response = await fetch(services[0]);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span>您的IP地址: ${data.ip || data.origin}</span>`;
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="error">❌ 检测失败</span>';
+                resultDiv.className += ' error';
+            }
+        }
+
+        async function checkProxy() {
+            const resultDiv = document.getElementById('proxy-result');
+            resultDiv.innerHTML = '<span class="loading">🔄 测试中...</span>';
+            
+            try {
+                // 调用我们的本地代理测试API
+                const response = await fetch('http://localhost:5000/api/proxy/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: 'http://httpbin.org/ip' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <span>✅ 代理连接成功</span><br>
+                        <small>响应时间: ${data.response_time}</small><br>
+                        <small>目标: ${data.target}</small>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<span class="error">❌ ${data.error}</span>`;
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="error">❌ 代理测试失败</span>';
+            }
+        }
+
+        async function checkMultipleServices() {
+            const resultDiv = document.getElementById('multiple-results');
+            resultDiv.innerHTML = '<div class="loading">🔄 检测多个服务中...</div>';
+            
+            const services = [
+                { name: 'ipify', url: 'https://api.ipify.org?format=json', field: 'ip' },
+                { name: 'httpbin', url: 'https://httpbin.org/ip', field: 'origin' },
+                { name: 'myip', url: 'https://api.my-ip.io/ip.json', field: 'ip' }
+            ];
+            
+            let results = '';
+            
+            for (const service of services) {
+                try {
+                    const response = await fetch(service.url);
+                    const data = await response.json();
+                    const ip = data[service.field] || '未知';
+                    results += `<div>📍 ${service.name}: <strong>${ip}</strong></div>`;
+                } catch (error) {
+                    results += `<div class="error">❌ ${service.name}: 检测失败</div>`;
+                }
+            }
+            
+            resultDiv.innerHTML = results;
+        }
+
+        // 页面加载时自动检测一次
+        window.onload = function() {
+            checkIP('direct');
+        };
+    </script>
+</body>
+</html>

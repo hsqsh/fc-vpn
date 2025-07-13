@@ -1,0 +1,28 @@
+{
+  "name": "proxy-web-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "dev": "vite",
+    "build:prod": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
+    "axios": "^1.5.0",
+    "echarts": "^5.4.3",
+    "element-plus": "^2.3.14",
+    "socket.io-client": "^4.7.2",
+    "vue": "^3.3.4",
+    "vue-echarts": "^6.6.1",
+    "vue-router": "^4.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "sass": "^1.66.1",
+    "vite": "^4.5.14"
+  }
+}

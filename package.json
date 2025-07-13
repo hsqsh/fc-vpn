@@ -1,0 +1,35 @@
+{
+    "name": "proxy-web-platform",
+    "version": "1.0.0",
+    "description": "基于 Vue3 + Flask 的现代化代理服务管理平台",
+    "main": "app.py",
+    "scripts": {
+        "dev": "python app.py",
+        "start": "gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5000 app:app",
+        "install": "powershell -ExecutionPolicy Bypass -File install.ps1",
+        "start-dev": "powershell -ExecutionPolicy Bypass -File start-dev.ps1",
+        "stop": "powershell -ExecutionPolicy Bypass -File stop.ps1",
+        "build": "docker build -t proxy-web:latest .",
+        "deploy-local": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -Environment local",
+        "deploy-eks": "powershell -ExecutionPolicy Bypass -File deploy.ps1 -Environment eks"
+    },
+    "keywords": [
+        "proxy",
+        "socks5",
+        "vue3",
+        "flask",
+        "kubernetes",
+        "docker",
+        "websocket"
+    ],
+    "author": "VPN Proxy Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/your-username/proxy-web-platform.git"
+    },
+    "engines": {
+        "python": ">=3.8",
+        "node": ">=16.0.0"
+    }
+}

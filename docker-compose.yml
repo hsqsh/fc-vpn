@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  proxy-web:
+    build: .
+    ports:
+      - "5000:5000"  # Web界面端口
+      - "8888:8888"  # SOCKS5代理端口
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+  # Redis (可选，用于会话存储和缓存)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+  # Nginx (可选，用于负载均衡和SSL终止)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - proxy-web
+    restart: unless-stopped
+    networks:
+      - proxy-network
+
+networks:
+  proxy-network:
+    driver: bridge
+
+volumes:
+  redis_data:
