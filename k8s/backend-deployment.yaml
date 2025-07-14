@@ -1,56 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: babelnet-backend
-  namespace: babelnet
-  labels:
-    app: babelnet-backend
+  name: backend-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: babelnet-backend
+      app: backend-app
   template:
     metadata:
       labels:
-        app: babelnet-backend
+        app: backend-app
     spec:
       containers:
-      - name: backend
-        image: babelnet-backend:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8000
-          name: api
-        - containerPort: 8888
-          name: proxy
-        env:
-        - name: LISTEN_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: babelnet-config
-              key: LISTEN_HOST
-        - name: LISTEN_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: babelnet-config
-              key: LISTEN_PORT
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8000
-          initialDelaySeconds: 5
-          periodSeconds: 5 
+        - name: backend-app
+          image: oliviaaa77/docker_backend:latest
+          ports:
+            - containerPort: 8000
+            - containerPort: 8888
+          env:
+            - name: LISTEN_HOST
+              value: "0.0.0.0"
+            - name: LISTEN_PORT
+              value: "8888"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 40
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
