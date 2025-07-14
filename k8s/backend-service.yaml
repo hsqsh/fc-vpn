@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # name: backend-service
+  name: backend
+spec:
+  selector:
+    app: backend-app
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+      nodePort: 30080
+    - name: custom
+      protocol: TCP
+      port: 8888
+      targetPort: 8888
+      nodePort: 30888
+  type: NodePort
