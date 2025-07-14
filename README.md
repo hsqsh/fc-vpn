@@ -85,6 +85,8 @@ babelnet/
    npm run serve
    ```
    Frontend will be available at: http://localhost:8080
+   
+   默认端口是 8080，但如被占用可能会自动变为 8081、8082 等。建议启动后看终端输出，确认实际端口。
 
 4. **Access the Application**
    - Dashboard: http://localhost:8080/#/
@@ -129,9 +131,9 @@ cd docker
 podman-compose -f podman-compose.yml up --build
 ```
 
-## Docker 镜像部署（推荐给组员）
+## ✨Docker 镜像部署（给组员）
 
-如果你不想本地构建镜像，可以直接拉取我推送到 Docker Hub 的镜像。
+⚠️如果你不想本地构建镜像，可以直接拉取我推送到 Docker Hub 的镜像。
 
 ### 步骤
 
