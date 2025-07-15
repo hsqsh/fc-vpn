@@ -5,13 +5,14 @@ services:
     build:
       context: ..
       dockerfile: docker/backend.Dockerfile
-    container_name: babelnet-backend
+    container_name: docker_backend
     ports:
       - "8000:8000"
       - "8888:8888"
     environment:
       - LISTEN_HOST=0.0.0.0
       - LISTEN_PORT=8888
+      - GO_API_URL=http://go-api:8080
     networks:
       - babelnet-network
     restart: unless-stopped
@@ -21,20 +22,51 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - go-api
+
+  go-api:
+    build:
+      context: ..
+      dockerfile: docker/go-api.Dockerfile
+    container_name: docker_go-api
+    ports:
+      - "8080:8080"
+    environment:
+      - LISTEN_HOST=0.0.0.0
+      - LISTEN_PORT=8080
+      - BACKEND_URL=http://backend:8000
+    networks:
+      - babelnet-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
     build:
       context: ..
       dockerfile: docker/frontend.Dockerfile
-    container_name: babelnet-frontend
+    container_name: docker_frontend
     ports:
       - "80:80"
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - GO_API_URL=http://go-api:8080
     depends_on:
       - backend
+      - go-api
     networks:
       - babelnet-network
     restart: unless-stopped
 
 networks:
   babelnet-network:
-    driver: bridge 
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

@@ -1,6 +1,6 @@
 module fc-vpn
 
-go 1.24.4
+go 1.20
 
 require (
 	k8s.io/apimachinery v0.27.1

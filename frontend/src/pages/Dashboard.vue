@@ -46,12 +46,22 @@
       </div>
       <div class="card">
         <h2>K8s Pods</h2>
-        <div>数量: <b>{{ pods.length }}</b></div>
-        <ul>
-          <li v-for="pod in pods" :key="pod.name">
-            {{ pod.name }} - <span :class="pod.status.toLowerCase()">{{ pod.status }}</span> ({{ pod.ip }})
-          </li>
-        </ul>
+        <div v-if="loading.pods" class="loading">Loading...</div>
+        <div v-else>
+          <div class="status-item">
+            <span class="label">数量:</span>
+            <span class="value"><b>{{ pods.length }}</b></span>
+          </div>
+          <ul class="pod-list">
+            <li v-for="pod in pods" :key="pod.name" class="pod-item">
+              <div class="pod-name">{{ pod.name }}</div>
+              <div class="pod-info">
+                <span :class="['pod-status', pod.status.toLowerCase()]">{{ pod.status }}</span>
+                <span class="pod-ip">({{ pod.ip || 'No IP' }})</span>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
       <div class="card">
         <h2>K8s Nodes</h2>
@@ -83,7 +93,7 @@ export default {
         isLoggedIn: false
       },
       showDropdown: false,
-      networkStatus: 'online', // 可根据实际API动态获取
+      networkStatus: 'online',
       proxyIp: '',
       proxyStatus: {
         active_connections: 0,
@@ -92,23 +102,40 @@ export default {
         total_traffic_down: 0
       },
       pods: [],
-      nodes: []
+      nodes: [],
+      updateInterval: null,
+      loading: {
+        pods: false,
+        nodes: false
+      }
     };
   },
   mounted() {
     this.loadUserInfo();
-    this.fetchProxyStatus();
-    this.fetchPods();
-    this.fetchNodes();
-    this.fetchProxyIp();
+    this.updateData();
+    // 设置定期更新
+    this.updateInterval = setInterval(() => {
+      this.updateData();
+    }, 5000);
     // 添加点击外部关闭下拉菜单的事件监听
     document.addEventListener('click', this.handleClickOutside);
   },
   beforeDestroy() {
-    // 移除事件监听
+    // 清理定时器和事件监听
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+    }
     document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
+    async updateData() {
+      await Promise.all([
+        this.fetchProxyStatus(),
+        this.fetchPods(),
+        this.fetchNodes(),
+        this.fetchProxyIp()
+      ]);
+    },
     loadUserInfo() {
       const user = localStorage.getItem('user');
       if (user) {
@@ -203,22 +230,44 @@ export default {
       } catch (e) {}
     },
     async fetchPods() {
+      this.loading.pods = true;
       try {
-        const res = await fetch('/k8s/pods');
+        const res = await fetch('/k8s/pods', {
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
         if (res.ok) {
           const data = await res.json();
-          this.pods = data.pods || [];
+          console.log('Pods data:', data);
+          if (Array.isArray(data.pods)) {
+            this.pods = data.pods;
+          } else {
+            console.error('Invalid pods data format:', data);
+          }
+        } else {
+          console.error('Failed to fetch pods:', res.status, res.statusText);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error fetching pods:', e);
+      } finally {
+        this.loading.pods = false;
+      }
     },
     async fetchNodes() {
       try {
         const res = await fetch('/k8s/nodes');
         if (res.ok) {
           const data = await res.json();
+          console.log('Nodes data:', data); // 添加日志
           this.nodes = data.nodes || [];
+        } else {
+          console.error('Failed to fetch nodes:', res.status, res.statusText);
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('Error fetching nodes:', e);
+      }
     },
     async fetchProxyIp() {
       try {
@@ -404,4 +453,60 @@ export default {
   letter-spacing: 0.5px;
   margin-bottom: 16px;
 }
-</style> 
+.loading {
+  color: #6b7280;
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+}
+
+.pod-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pod-item {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.pod-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.pod-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.pod-status {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.pod-status.running {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.pod-status.pending {
+  background: rgba(245, 158, 66, 0.2);
+  color: #f59e42;
+}
+
+.pod-status.failed {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.pod-ip {
+  color: #9ca3af;
+}
+</style>
