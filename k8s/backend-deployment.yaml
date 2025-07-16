@@ -6,7 +6,7 @@ metadata:
   labels:
     app: babelnet-backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: babelnet-backend
@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: babelnet-backend:latest
-        imagePullPolicy: IfNotPresent
+        image: oliviaaa77/babelnet-backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
           name: api
@@ -54,3 +54,4 @@ spec:
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5 
+      serviceAccountName: backend-sa

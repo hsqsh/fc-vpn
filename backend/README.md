@@ -1,13 +1,13 @@
 # BabelNet Backend
 
-FastAPI-based backend service for BabelNet, providing SOCKS5 proxy functionality, user authentication, and Kubernetes integration simulation.
+FastAPI-based backend service for BabelNet, providing SOCKS5 proxy functionality, user authentication, and Kubernetes integration/monitoring API.
 
 ## Features
 
 - **SOCKS5 Proxy Server**: High-performance TCP traffic forwarding
 - **RESTful API**: FastAPI with automatic OpenAPI documentation
 - **User Authentication**: Register/login system with session management
-- **Kubernetes Mock API**: Simulated K8s endpoints for development
+- **Kubernetes Monitoring API**: Real-time K8s cluster monitoring endpoints (pods, CPU, memory, etc.)
 - **Real-time Monitoring**: Proxy status and traffic statistics
 
 ## Project Structure
@@ -18,7 +18,7 @@ backend/
 │   ├── __init__.py          # Package marker
 │   ├── proxy.py             # SOCKS5 proxy + API endpoints
 │   ├── auth.py              # User authentication
-│   ├── k8s_mock.py          # Kubernetes mock API
+│   ├── k8s_mock_monitor.py  # Kubernetes cluster monitoring API
 │   └── config.py            # Configuration settings
 ├── main.py                  # FastAPI application entry point
 ├── requirements.txt         # Python dependencies
@@ -115,51 +115,26 @@ GET /proxy/ip
 }
 ```
 
-### Kubernetes Mock API
+### Kubernetes Monitoring API
 
-#### Get Pods
+#### Get Cluster Monitor Info
 ```http
-GET /k8s/pods
+GET /api/cluster-monitor
 ```
 
 **Response:**
 ```json
 {
+  "pod_count": 3,
   "pods": [
-    {
-      "name": "vpn-proxy-1",
-      "status": "Running",
-      "ip": "10.0.0.1"
-    },
-    {
-      "name": "vpn-proxy-2",
-      "status": "Pending",
-      "ip": "10.0.0.2"
-    }
+    {"name": "pod-1", "cpu": 10, "memory": 128000000, "status": "Running"},
+    {"name": "pod-2", "cpu": 5, "memory": 64000000, "status": "Pending"}
   ]
 }
 ```
 
-#### Get Nodes
-```http
-GET /k8s/nodes
-```
-
-**Response:**
-```json
-{
-  "nodes": [
-    {
-      "name": "node-1",
-      "status": "Ready"
-    },
-    {
-      "name": "node-2",
-      "status": "NotReady"
-    }
-  ]
-}
-```
+- Returns the number of pods and resource usage (CPU, memory, status) for each pod in the current namespace.
+- Data is fetched from the Kubernetes API and metrics-server.
 
 ## SOCKS5 Proxy
 

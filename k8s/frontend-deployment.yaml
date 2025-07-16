@@ -6,7 +6,7 @@ metadata:
   labels:
     app: babelnet-frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: babelnet-frontend
@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: babelnet-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: oliviaaa77/babelnet-frontend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
           name: http
