@@ -37,7 +37,7 @@
     </div>
     <!-- 左下角半透明logo背景，替换src为你的logo图片路径，如 /logo.png 或 @/assets/logo.png -->
     <div class="background-logo">
-      <img src="/logo.png" alt="BabelMesh Logo" />
+      <img src="/BabelMesh_logo.jpg" alt="BabelMesh Logo" />
       <!-- TODO: 将你的logo图片放到 public 目录下，并将 src 替换为实际路径 -->
     </div>
     <div id="particles-js" class="particles-bg"></div>
@@ -340,7 +340,7 @@ export default {
 }
 .background-logo {
   position: fixed;
-  left: 0;
+  right: 0;
   bottom: 0;
   z-index: 0;
   pointer-events: none;
