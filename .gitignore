@@ -39,6 +39,7 @@ frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/.DS_Store
+node_modules/
 
 # Log files
 *.log
