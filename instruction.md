@@ -17,18 +17,19 @@
 - Port: 8888
 
 - List of addresses not to be proxied:
+    - keep all the original ones
     - add: North America IP; Europe IP; Oceania IP
     - add: URL of North America; Europe; Oceania
 
-- Back to the monitor and watch the change
+- Back to the monitor and watch the changes
 
 - shhhsecret.win
 - expect output: our page
 
 ## User's persional solution
-- home uni's VPN
+- home uni's VPN, or
 - Personal VPN
-- tips: as long as not in singapore
+- tips: as long as not to choose Singapore
 
 - shhhsecret.win
 - Expect output: our page
@@ -39,5 +40,5 @@
  - Reason: Cache 
 
 
-
-- North America frontend (planB): http://af9b6b787679c4e53ab29ff55327dbd0-169112404.us-east-1.elb.amazonaws.com/
+### Plan B
+- North America frontend: http://af9b6b787679c4e53ab29ff55327dbd0-169112404.us-east-1.elb.amazonaws.com/
