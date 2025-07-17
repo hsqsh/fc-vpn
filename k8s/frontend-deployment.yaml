@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: frontend-app
-          image: oliviaaa77/docker_frontend:latest
+          image: sihan1196/fc-vpn-frontend:latest
           ports:
             - containerPort: 80

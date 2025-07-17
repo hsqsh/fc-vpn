@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend-app
-          image: oliviaaa77/docker_backend:latest
+          image: sihan1196/docker_backend:latest
           ports:
             - containerPort: 8000
             - containerPort: 8888

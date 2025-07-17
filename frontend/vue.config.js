@@ -11,7 +11,7 @@ module.exports = {
                 changeOrigin: true
             },
             '/k8s': {
-                target: 'http://localhost:8000',
+                target: 'http://localhost:8080',
                 changeOrigin: true
             }
         }
