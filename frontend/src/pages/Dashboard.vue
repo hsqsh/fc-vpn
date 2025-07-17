@@ -204,7 +204,7 @@ export default {
         this.selectedMessage = 'Europe node';
       } else if (node === 'North America') {
         // 跳转到 North America 代理网页
-        window.open('http://af9b6b787679c4e53b29ff55327-169112404-east-1.elb.amazonaws.com', '_blank');
+        window.open('http://af9b6b787679c4e53ab29ff55327dbd0-169112404.us-east-1.elb.amazonaws.com', '_blank');
         this.selectedMessage = 'Connecting to North America node...';
       } else if (node === 'Oceania') {
         this.selectedMessage = 'Oceania node';
