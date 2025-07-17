@@ -35,7 +35,7 @@
 
 ## User's persional solution
 - Home univeristy's VPN, or
-- Personal VPN on phone
+- Personal VPN on phone/PC
 - Tips: as long as not to choose Singapore
 - shhhsecret.win
 - Expect output: our page (and you can hack into our system)
