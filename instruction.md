@@ -30,7 +30,7 @@
 
 - Step 5: Reconnect to shhhsecret.win
     - Expect output: our page
-    - Put your volumn to the *largest* **(just kidding but plz be aware :))** and you will thank me 
+    - Put your volumn to the *largest* **(just kidding but plz be aware :))** and you will thank me 😗
     - Play around (and hack into our system)
 
 ## User's persional solution
