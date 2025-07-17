@@ -2,4 +2,5 @@ fastapi
 uvicorn
 requests
 kubernetes
+httpx
 # 如需其他依赖请补充

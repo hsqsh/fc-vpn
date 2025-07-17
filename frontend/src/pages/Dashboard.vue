@@ -34,6 +34,34 @@
       <div v-if="selectedMessage" class="node-message">
         {{ selectedMessage }}
       </div>
+      <!-- K8s 监控区块 - 暂时注释掉
+      <div class="k8s-monitor">
+        <div class="monitor-title">Kubernetes Monitor</div>
+        <div v-if="monitorLoading" class="monitor-loading">Loading...</div>
+        <div v-else-if="monitorError" class="monitor-error">{{ monitorError }}</div>
+        <div v-else>
+          <div class="monitor-summary">
+            <div class="summary-item">             <span class="summary-label">Total Pods:</span>
+              <span class="summary-value">{{ monitorData.pod_count }}</span>
+            </div>
+            <div class="summary-item" v-if="totalCpu > 0">             <span class="summary-label">Total CPU:</span>
+              <span class="summary-value">{{ totalCpu.toFixed(2) }} m</span>
+            </div>
+            <div class="summary-item" v-if="totalMemory > 0">             <span class="summary-label">Total Memory:</span>
+              <span class="summary-value">{{ (totalMemory/1024/1024).toFixed(1) }} Mi</span>
+            </div>
+          </div>
+          
+          <div class="monitor-pods">
+            <div class="monitor-pod" v-for="pod in monitorData.pods" :key="pod.name">              <div class="pod-name">{{ pod.name }}</div>
+              <div class="pod-status" :class="pod.status.toLowerCase()">{{ pod.status }}</div>
+              <div class="pod-cpu">CPU: {{ pod.cpu.toFixed(2) }} m</div>
+              <div class="pod-mem">Memory: {{ (pod.memory/1024/1024).toFixed(1) }} Mi</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      -->
     </div>
     <!-- 左下角半透明logo背景，替换src为你的logo图片路径，如 /logo.png 或 @/assets/logo.png -->
     <div class="background-logo">
@@ -55,11 +83,28 @@ export default {
       },
       showDropdown: false,
       selectedMessage: '',
+      // K8s 监控相关
+      monitorData: { pod_count: '-', pods: [] },
+      monitorLoading: true,
+      monitorError: '',
+      monitorTimer: null,
     };
+  },
+  computed: {
+    totalCpu() {
+      if (!this.monitorData.pods || this.monitorData.pods.length === 0) return 0;
+      return this.monitorData.pods.reduce((sum, pod) => sum + (pod.cpu || 0), 0);
+    },
+    totalMemory() {
+      if (!this.monitorData.pods || this.monitorData.pods.length === 0) return 0;
+      return this.monitorData.pods.reduce((sum, pod) => sum + (pod.memory || 0), 0);
+    }
   },
   mounted() {
     this.loadUserInfo();
     document.addEventListener('click', this.handleClickOutside);
+    this.fetchMonitor();
+    this.monitorTimer = setInterval(this.fetchMonitor, 10000); // 10秒刷新
     if (window.particlesJS) {
       window.particlesJS.load('particles-js', '/particles.json');
     } else {
@@ -73,6 +118,7 @@ export default {
   },
   beforeDestroy() {
     document.removeEventListener('click', this.handleClickOutside);
+    if (this.monitorTimer) clearInterval(this.monitorTimer);
   },
   methods: {
     loadUserInfo() {
@@ -157,10 +203,34 @@ export default {
       if (node === 'Europe') {
         this.selectedMessage = 'Europe node';
       } else if (node === 'North America') {
-        this.selectedMessage = 'North America node';
+        // 跳转到 North America 代理网页
+        window.open('http://af9b6b787679c4e53b29ff55327-169112404-east-1.elb.amazonaws.com', '_blank');
+        this.selectedMessage = 'Connecting to North America node...';
       } else if (node === 'Oceania') {
         this.selectedMessage = 'Oceania node';
       }
+    },
+    fetchMonitor() {
+      this.monitorLoading = true;
+      this.monitorError = '';
+      fetch('/api/cluster-monitor')
+        .then(res => res.json())
+        .then(data => {
+          console.log('Monitor data received:', data); // 调试信息
+          if (data.error) {
+            this.monitorError = data.error;
+            this.monitorData = { pod_count: '-', pods: [] };
+          } else {
+            this.monitorData = data;
+            console.log('Monitor data set:', this.monitorData); // 调试信息
+          }
+          this.monitorLoading = false;
+        })
+        .catch(err => {
+          console.error('Monitor fetch error:', err); // 调试信息
+          this.monitorError = 'Failed to fetch monitor data';
+          this.monitorLoading = false;
+        });
     },
   },
 };
@@ -363,5 +433,103 @@ export default {
   height: 100vh;
   z-index: 0;
   pointer-events: none;
+}
+.k8s-monitor {
+  margin: 48px auto 0 auto;
+  max-width: 700px;
+  background: rgba(20, 40, 80, 0.82);
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(64,158,255,0.18), 0 0 24px 2px #1e3c72 inset;
+  padding: 32px 24px 24px 24px;
+  color: #fff;
+  font-family: 'Orbitron', 'Segoe UI', 'Arial', sans-serif;
+  text-align: left;
+}
+.monitor-title {
+  font-size: 1.5em;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #fff;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 12px #3b82f6, 0 1px 0 #222;
+  text-align: center;
+}
+.monitor-summary {
+  font-size: 1.2em;
+  margin-bottom: 12px;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.summary-item {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+.summary-label {
+  font-size: 0.9em;
+  color: #fff;
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+.summary-value {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 8px #3b82f6;
+}
+.monitor-pods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+.monitor-pod {
+  background: rgba(59, 130, 246, 0.13);
+  border: 1.5px solid #3b82f6;
+  border-radius: 12px;
+  padding: 16px 18px;
+  min-width: 180px;
+  flex: 1 1 180px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 12px #1e90ff22;
+}
+.pod-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.pod-status {
+  font-size: 1em;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #22c55e;
+}
+.pod-status.pending {
+  color: #ff9800;
+}
+.pod-status.failed {
+  color: #ff3b3b;
+}
+.pod-cpu, .pod-mem {
+  font-size: 0.98em;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.monitor-loading {
+  color: #fff;
+  font-size: 1.1em;
+}
+.monitor-error {
+  color: #ff3b3b;
+  font-size: 1.1em;
+  margin-bottom: 8px;
 }
 </style> 

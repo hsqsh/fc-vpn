@@ -1,9 +1,5 @@
 # 使用 fastapi K8s 场景的模拟接口
 from fastapi import APIRouter
-
-router = APIRouter()
-
-from fastapi import APIRouter
 from kubernetes import client, config
 import requests
 import os
@@ -12,46 +8,59 @@ router = APIRouter()
 
 @router.get("/api/cluster-monitor")
 def cluster_monitor():
-    # 1. 加载 in-cluster 配置（确保后端部署在 K8s 集群内）
-    config.load_incluster_config()
-    v1 = client.CoreV1Api()
-    namespace = os.environ.get("NAMESPACE", "default")  # 可通过环境变量指定
-
-    # 2. 获取 Pod 列表
-    pods = v1.list_namespaced_pod(namespace=namespace)
-    pod_names = [pod.metadata.name for pod in pods.items]
-
-    # 3. 获取 metrics-server 的 Pod 资源使用率
-    # metrics-server 的 service 默认在 kube-system 命名空间
-    metrics_url = f"http://metrics-server.kube-system.svc.cluster.local/apis/metrics.k8s.io/v1beta1/namespaces/{namespace}/pods"
     try:
-        metrics = requests.get(metrics_url, timeout=3).json()
+        # 1. 加载 in-cluster 配置（确保后端部署在 K8s 集群内）
+        config.load_incluster_config()
+        v1 = client.CoreV1Api()
+        namespace = os.environ.get("NAMESPACE", "babelnet")  # 使用 babelnet namespace
+
+        # 2. 获取 Pod 列表
+        pods = v1.list_namespaced_pod(namespace=namespace)
+        pod_names = [pod.metadata.name for pod in pods.items]
+
+        # 3. 获取 metrics-server 的 Pod 资源使用率
+        # 使用 kubectl proxy 风格的 API 调用
+        try:
+            # 先尝试直接调用 metrics API
+            metrics_api = client.CustomObjectsApi()
+            metrics = metrics_api.list_namespaced_custom_object(
+                group="metrics.k8s.io",
+                version="v1beta1",
+                namespace=namespace,
+                plural="pods"
+            )
+            
+            pod_metrics = {}
+            for item in metrics.get("items", []):
+                name = item["metadata"]["name"]
+                containers = item["containers"]
+                cpu = sum([parse_cpu(c["usage"]["cpu"]) for c in containers])
+                memory = sum([parse_memory(c["usage"]["memory"]) for c in containers])
+                pod_metrics[name] = {"cpu": cpu, "memory": memory}
+                
+        except Exception as e:
+            # 如果 metrics API 失败，返回基本 Pod 信息
+            pod_metrics = {}
+            print(f"Metrics API error: {e}")
+
+        # 4. 组装返回数据
+        result = []
+        for pod in pods.items:
+            name = pod.metadata.name
+            result.append({
+                "name": name,
+                "cpu": pod_metrics.get(name, {}).get("cpu", 0),
+                "memory": pod_metrics.get(name, {}).get("memory", 0),
+                "status": pod.status.phase
+            })
+
+        return {
+            "pod_count": len(result),
+            "pods": result
+        }
+        
     except Exception as e:
-        return {"error": f"Failed to fetch metrics: {e}"}
-
-    pod_metrics = {}
-    for item in metrics.get("items", []):
-        name = item["metadata"]["name"]
-        containers = item["containers"]
-        cpu = sum([parse_cpu(c["usage"]["cpu"]) for c in containers])
-        memory = sum([parse_memory(c["usage"]["memory"]) for c in containers])
-        pod_metrics[name] = {"cpu": cpu, "memory": memory}
-
-    # 4. 组装返回数据
-    result = []
-    for pod in pods.items:
-        name = pod.metadata.name
-        result.append({
-            "name": name,
-            "cpu": pod_metrics.get(name, {}).get("cpu", 0),
-            "memory": pod_metrics.get(name, {}).get("memory", 0),
-            "status": pod.status.phase
-        })
-
-    return {
-        "pod_count": len(result),
-        "pods": result
-    }
+        return {"error": f"Failed to fetch cluster info: {str(e)}"}
 
 def parse_cpu(cpu_str):
     # 解析 cpu 字符串（如 '10m', '100n', '1'）

@@ -2,8 +2,10 @@ from fastapi import FastAPI, Request
 from pydantic import BaseModel
 import httpx
 import time
+from app.k8s_mock_monitor import router as k8s_router
 
 app = FastAPI()
+app.include_router(k8s_router)
 
 class ProxyTestRequest(BaseModel):
     target_url: str

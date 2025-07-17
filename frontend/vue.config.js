@@ -13,6 +13,10 @@ module.exports = {
             '/k8s': {
                 target: 'http://localhost:8000',
                 changeOrigin: true
+            },
+            '/api': {
+                target: 'http://localhost:8000',
+                changeOrigin: true
             }
         }
     },
