@@ -26,12 +26,12 @@
         - add: URL of North America, or; Europe, or; Oceania, and **delete the final slash "/"!!!**
 
 - Step 4: Back to the monitor and watch the changes
-    - Check the IP location, see the connections, refresh the page, hack into our system...
+    - Check the IP location, see the connections, refresh the page(, hack into our system...)
 
 - Step 5: Reconnect to shhhsecret.win
     - Expect output: our page
     - Put your volumn to the *largest* **(just kidding but plz be aware :))** and you will thank me 
-    - Play around and hack into our system
+    - Play around (and hack into our system)
 
 ## User's persional solution
 - Home univeristy's VPN, or
