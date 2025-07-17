@@ -7,7 +7,7 @@
 ## Babelmesh solution (SHOUT OUT IF YOU LOSE TRACK)
 - Prerequesites: Edge/Chrome/Firefox
 - Current URL: github.com/hsqsh/fc-vpn/blob/main/instruction.md
-- Step 1: Login portal: http://aa90ca31a2b124e369129983b52ee555-2021815292.us-east-1.elb.amazonaws.com/
+- Step 1: Sign up on portal and choose a node: http://aa90ca31a2b124e369129983b52ee555-2021815292.us-east-1.elb.amazonaws.com/
 
 - Step 2: Download Extension: Proxy SwitchyOmega 3 (ZeroOmega)
 
