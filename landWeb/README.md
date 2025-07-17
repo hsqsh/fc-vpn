@@ -1,5 +1,15 @@
 # BabelNet Landing Page 配置指南
 
+## 启动网站
+
+```bash
+python3 -m http.server 8111
+```
+另一个terminal上
+```bash
+cloudflared tunnel run mytunnel
+```
+
 ## 图片替换指南
 
 ### 1. Logo 替换
