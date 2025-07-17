@@ -38,7 +38,7 @@
 - Personal VPN on phone
 - Tips: as long as not to choose Singapore
 - shhhsecret.win
-- Expect output: our page
+- Expect output: our page (and you can hack into our system)
 
 ## Disconnect retry
  - tips: Refresh multiple times, or
