@@ -1,0 +1,111 @@
+# ===================================================================
+# VPN后端服务 - Flask API + 代理服务器
+# ===================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: vpn-proxy
+  labels:
+    app: vpn-backend
+    tier: backend
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vpn-backend
+  template:
+    metadata:      
+      labels:
+        app: vpn-backend
+        tier: backend
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: backend
+        image: 782486516265.dkr.ecr.us-east-1.amazonaws.com/vpn-backend:latest
+        ports:
+        - containerPort: 5000
+          name: api-port
+          protocol: TCP
+        - containerPort: 8888
+          name: proxy-port
+          protocol: TCP
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: PORT
+          value: "5000"
+        - name: PROXY_PORT
+          value: "8888"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: app-logs
+          mountPath: /app/logs
+      volumes:
+      - name: app-logs
+        emptyDir: {}
+      restartPolicy: Always
+
+---
+# ===================================================================
+# Backend Service - 负载均衡和服务发现
+# ===================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: vpn-proxy
+  labels:
+    app: vpn-backend
+    tier: backend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: api-port
+    port: 5000
+    targetPort: 5000
+    protocol: TCP
+  - name: proxy-port
+    port: 8888
+    targetPort: 8888
+    protocol: TCP
+  selector:
+    app: vpn-backend
+    tier: backend
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 3600

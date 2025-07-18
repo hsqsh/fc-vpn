@@ -1,0 +1,120 @@
+# ===================================================================
+# Nginx配置 - 前端代理和API转发
+# ===================================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: vpn-proxy
+  labels:
+    app: vpn-frontend
+data:
+  default.conf: |
+    # ===================================================================
+    # 前端静态文件服务和API代理配置
+    # ===================================================================
+    
+    # 启用Gzip压缩
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_min_length 1000;
+    
+    # 上游后端服务
+    upstream backend_api {
+        server backend-service:5000;
+    }
+    
+    # 上游代理服务
+    upstream proxy_service {
+        server backend-service:8888;
+    }
+    
+    server {
+        listen 80;
+        server_name localhost;
+        
+        # 静态文件根目录
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        
+        # ===================================================================
+        # 前端路由配置 - Vue.js SPA
+        # ===================================================================
+        location / {
+            try_files $uri $uri/ /index.html;
+            
+            # 缓存策略
+            location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+            }
+        }
+        
+        # ===================================================================
+        # API代理配置 - 转发到后端服务
+        # ===================================================================
+        location /api/ {
+            proxy_pass http://backend_api;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # WebSocket支持
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            
+            # 超时配置
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+        
+        # ===================================================================
+        # 健康检查端点代理
+        # ===================================================================
+        location /health {
+            proxy_pass http://backend_api;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        location /ready {
+            proxy_pass http://backend_api;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        # ===================================================================
+        # Socket.IO WebSocket代理
+        # ===================================================================
+        location /socket.io/ {
+            proxy_pass http://backend_api;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # ===================================================================
+        # 代理服务端口转发 (可选)
+        # ===================================================================
+        location /proxy/ {
+            proxy_pass http://proxy_service/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        
+        # 错误页面
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }

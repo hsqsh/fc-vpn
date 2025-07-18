@@ -1,0 +1,15 @@
+# ===================================================================
+# VPN代理服务命名空间 - 资源隔离
+# ===================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vpn-proxy
+  labels:
+    app: vpn-proxy
+    environment: production
+    managed-by: kubectl
+  annotations:
+    description: "VPN代理服务的命名空间，包含所有相关资源"
+    created-by: "deployment-script"
+    version: "v1.0.0"

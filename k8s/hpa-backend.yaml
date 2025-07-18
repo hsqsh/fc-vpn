@@ -1,0 +1,166 @@
+# ===================================================================
+# Backend Horizontal Pod Autoscaler - 基于多指标的动态缩放
+# ===================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-hpa
+  namespace: vpn-proxy
+  labels:
+    app: vpn-backend
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend-deployment
+  
+  # 缩放范围：最小1个Pod，最大10个Pod
+  minReplicas: 1
+  maxReplicas: 10
+  
+  # 缩放行为配置
+  behavior:
+    scaleUp:
+      # 扩容策略：谨慎扩容，避免过度响应
+      stabilizationWindowSeconds: 60    # 扩容稳定窗口60秒
+      policies:
+      - type: Percent
+        value: 100                      # 每次最多扩容100%（翻倍）
+        periodSeconds: 60               # 60秒内的扩容限制
+      - type: Pods
+        value: 2                        # 每次最多增加2个Pod
+        periodSeconds: 60
+      selectPolicy: Min                 # 选择最保守的策略
+    scaleDown:
+      # 缩容策略：缓慢缩容，避免频繁波动
+      stabilizationWindowSeconds: 300   # 缩容稳定窗口5分钟
+      policies:
+      - type: Percent
+        value: 50                       # 每次最多缩容50%
+        periodSeconds: 180              # 3分钟内的缩容限制
+      - type: Pods
+        value: 1                        # 每次最多减少1个Pod
+        periodSeconds: 60
+      selectPolicy: Min                 # 选择最保守的策略
+    # 缩放指标配置 - 基于标准资源指标
+  metrics:
+  # 1. CPU使用率指标 - 主要指标
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70          # CPU使用率超过70%时触发扩容
+  
+  # 2. 内存使用率指标 - 辅助指标  
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80          # 内存使用率超过80%时触发扩容
+
+---
+# ===================================================================
+# Frontend Horizontal Pod Autoscaler - 基于资源使用率的动态缩放
+# ===================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend-hpa
+  namespace: vpn-proxy
+  labels:
+    app: vpn-frontend
+    component: autoscaling
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-deployment
+  
+  # 缩放范围：最小2个Pod，最大8个Pod
+  minReplicas: 2
+  maxReplicas: 8
+  
+  # 缩放行为配置
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 120   # 扩容稳定窗口2分钟
+      policies:
+      - type: Percent
+        value: 50                       # 每次最多扩容50%
+        periodSeconds: 120
+      - type: Pods
+        value: 2                        # 每次最多增加2个Pod
+        periodSeconds: 120
+      selectPolicy: Min
+    scaleDown:
+      stabilizationWindowSeconds: 300   # 缩容稳定窗口5分钟
+      policies:
+      - type: Percent
+        value: 25                       # 每次最多缩容25%
+        periodSeconds: 180
+      - type: Pods
+        value: 1                        # 每次最多减少1个Pod
+        periodSeconds: 120
+      selectPolicy: Min
+  
+  # 缩放指标配置
+  metrics:
+  # CPU使用率指标
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60          # CPU使用率超过60%时触发扩容
+  
+  # 内存使用率指标
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+  maxReplicas: 6
+  
+  # 缩放行为配置
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 60
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 180
+      - type: Pods
+        value: 1
+        periodSeconds: 120
+      selectPolicy: Min
+  
+  # 缩放指标配置（前端主要基于资源使用率）
+  metrics:
+  # CPU使用率指标
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 75          # CPU使用率超过75%时触发扩容
+  
+  # 内存使用率指标
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 85          # 内存使用率超过85%时触发扩容

@@ -1,0 +1,95 @@
+# ===================================================================
+# VPN前端服务 - Vue.js + Nginx反向代理
+# ===================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: vpn-proxy
+  labels:
+    app: vpn-frontend
+    tier: frontend
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vpn-frontend
+  template:
+    metadata:
+      labels:
+        app: vpn-frontend
+        tier: frontend
+        version: v1
+    spec:
+      containers:
+      - name: frontend
+        image: 782486516265.dkr.ecr.us-east-1.amazonaws.com/vpn-frontend:latest
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        env:
+        - name: BACKEND_API_URL
+          value: "http://backend-service:5000"
+        - name: NGINX_WORKER_PROCESSES
+          value: "auto"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+      restartPolicy: Always
+
+---
+# ===================================================================
+# Frontend Service - 外部访问入口
+# ===================================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: vpn-proxy
+  labels:
+    app: vpn-frontend
+    tier: frontend
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  selector:
+    app: vpn-frontend
+    tier: frontend
+  sessionAffinity: None
