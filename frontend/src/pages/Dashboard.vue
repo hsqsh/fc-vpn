@@ -200,15 +200,9 @@ export default {
         this.selectedMessage = 'Please login first';
         return;
       }
-      if (node === 'Europe') {
-        this.selectedMessage = 'Europe node';
-      } else if (node === 'North America') {
-        // 跳转到 North America 代理网页
-        window.open('http://af9b6b787679c4e53ab29ff55327dbd0-169112404.us-east-1.elb.amazonaws.com', '_blank');
-        this.selectedMessage = 'Connecting to North America node...';
-      } else if (node === 'Oceania') {
-        this.selectedMessage = 'Oceania node';
-      }
+      // 统一跳转到 North America 代理网页
+      window.open('http://af9b6b787679c4e53ab29ff55327dbd0-169112404.us-east-1.elb.amazonaws.com', '_blank');
+      this.selectedMessage = `Connecting to ${node} node...`;
     },
     fetchMonitor() {
       this.monitorLoading = true;
